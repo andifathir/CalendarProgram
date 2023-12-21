@@ -58,6 +58,7 @@ public class Calendar extends Application {
         // FileChooser
         fileChooser = new FileChooser();
 
+        // Layout
         VBox layout = new VBox(10);
         layout.setPadding(new Insets(10, 10, 10, 10));
         layout.getChildren().addAll(datePicker, eventLabel, eventTextField, saveButton, deleteButton, saveToFileButton, loadFromFileButton, eventListView);
@@ -69,61 +70,77 @@ public class Calendar extends Application {
     }
 
     private void saveEvent() {
-        String date = datePicker.getValue().toString();
-        String event = eventTextField.getText();
+        try {
+            String date = datePicker.getValue().toString();
+            String event = eventTextField.getText();
 
-        if (date.isEmpty() || event.isEmpty()) {
-            showAlert("Warning", "Please select a date and enter an event.");
-            return;
+            if (date.isEmpty() || event.isEmpty()) {
+                showAlert("Warning", "Please select a date and enter an event");
+                return;
+            }
+
+            String eventData = date + ": " + event;
+            eventListView.getItems().add(eventData);
+
+            showAlert("Event Saved", "Event has been saved successfully");
+        } catch (NullPointerException e) {
+            showAlert("Error", "Please select a date");
         }
-
-        String eventData = date + ": " + event;
-        eventListView.getItems().add(eventData);
-
-        showAlert("Event Saved", "Event has been saved successfully.");
     }
 
     private void deleteEvent() {
-        int selectedIndex = eventListView.getSelectionModel().getSelectedIndex();
-        if (selectedIndex != -1) {
-            eventListView.getItems().remove(selectedIndex);
-            showAlert("Event Deleted", "Selected event has been deleted.");
-        } else {
-            showAlert("Warning", "Please select an event to delete.");
+        try {
+            int selectedIndex = eventListView.getSelectionModel().getSelectedIndex();
+            if (selectedIndex != -1) {
+                eventListView.getItems().remove(selectedIndex);
+                showAlert("Event Deleted", "Selected event has been deleted");
+            } else {
+                showAlert("Warning", "Please select an event to delete");
+            }
+        } catch (IndexOutOfBoundsException e) {
+            showAlert("Error", "No event selected for deletion");
         }
     }
 
     private void saveToFile() {
-        List<String> events = new ArrayList<>(eventListView.getItems());
+        try {
+            List<String> events = new ArrayList<>(eventListView.getItems());
 
-        File file = fileChooser.showSaveDialog(null);
+            File file = fileChooser.showSaveDialog(null);
 
-        if (file != null) {
-            try (PrintWriter writer = new PrintWriter(file)) {
-                for (String event : events) {
-                    writer.println(event);
+            if (file != null) {
+                try (PrintWriter writer = new PrintWriter(file)) {
+                    for (String event : events) {
+                        writer.println(event);
+                    }
+                    showAlert("File Saved", "Events have been saved to the file.");
+                } catch (IOException e) {
+                    showAlert("Error", "An error occurred while saving the file.");
                 }
-                showAlert("File Saved", "Events have been saved to the file.");
-            } catch (IOException e) {
-                showAlert("Error", "An error occurred while saving the file.");
             }
+        } catch (NullPointerException e) {
+            showAlert("Error", "No events to save.");
         }
     }
 
     private void loadFromFile() {
-        File file = fileChooser.showOpenDialog(null);
+        try {
+            File file = fileChooser.showOpenDialog(null);
 
-        if (file != null) {
-            try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
-                eventListView.getItems().clear();
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    eventListView.getItems().add(line);
+            if (file != null) {
+                try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+                    eventListView.getItems().clear();
+                    String line;
+                    while ((line = reader.readLine()) != null) {
+                        eventListView.getItems().add(line);
+                    }
+                    showAlert("File Loaded", "Events have been loaded from the file.");
+                } catch (IOException e) {
+                    showAlert("Error", "An error occurred while loading the file.");
                 }
-                showAlert("File Loaded", "Events have been loaded from the file.");
-            } catch (IOException e) {
-                showAlert("Error", "An error occurred while loading the file.");
             }
+        } catch (NullPointerException e) {
+            showAlert("Error", "No file selected to load events from.");
         }
     }
 
@@ -135,5 +152,3 @@ public class Calendar extends Application {
         alert.showAndWait();
     }
 }
-
-
