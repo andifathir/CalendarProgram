@@ -1,5 +1,4 @@
 package com.example.calendar;
-
 import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
@@ -7,7 +6,6 @@ import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
-
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -19,6 +17,8 @@ public class Calendar extends Application {
     private ListView<String> eventListView;
 
     private FileChooser fileChooser;
+
+    private static final int MAX_CHARACTERS = 100;
 
     public static void main(String[] args) {
         launch(args);
@@ -35,6 +35,9 @@ public class Calendar extends Application {
         // Event TextField
         Label eventLabel = new Label("Event:");
         eventTextField = new TextField();
+        eventTextField.setTextFormatter(new TextFormatter<String>(change ->
+                change.getControlNewText().length() <= MAX_CHARACTERS ? change : null));
+
 
         // Save Button
         Button saveButton = new Button("Save Event");
@@ -75,16 +78,16 @@ public class Calendar extends Application {
             String event = eventTextField.getText();
 
             if (date.isEmpty() || event.isEmpty()) {
-                showAlert("Warning", "Please select a date and enter an event");
+                showAlert("Warning", "Please select a date and enter an event.");
                 return;
             }
 
             String eventData = date + ": " + event;
             eventListView.getItems().add(eventData);
 
-            showAlert("Event Saved", "Event has been saved successfully");
+            showAlert("Event Saved", "Event has been saved successfully.");
         } catch (NullPointerException e) {
-            showAlert("Error", "Please select a date");
+            showAlert("Error", "Please select a date.");
         }
     }
 
@@ -93,12 +96,12 @@ public class Calendar extends Application {
             int selectedIndex = eventListView.getSelectionModel().getSelectedIndex();
             if (selectedIndex != -1) {
                 eventListView.getItems().remove(selectedIndex);
-                showAlert("Event Deleted", "Selected event has been deleted");
+                showAlert("Event Deleted", "Selected event has been deleted.");
             } else {
-                showAlert("Warning", "Please select an event to delete");
+                showAlert("Warning", "Please select an event to delete.");
             }
         } catch (IndexOutOfBoundsException e) {
-            showAlert("Error", "No event selected for deletion");
+            showAlert("Error", "No event selected for deletion.");
         }
     }
 
@@ -151,4 +154,5 @@ public class Calendar extends Application {
         alert.setContentText(message);
         alert.showAndWait();
     }
+
 }
