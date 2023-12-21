@@ -15,7 +15,6 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 
-
 public class Calendar extends Application {
 
     private DatePicker datePicker;
@@ -36,6 +35,8 @@ public class Calendar extends Application {
 
         datePicker = new DatePicker();
         datePicker.setPromptText("Select a date");
+        datePicker.setValue(LocalDate.now());
+
 
         StringConverter<LocalDate> converter = new StringConverter<>() {
             final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
