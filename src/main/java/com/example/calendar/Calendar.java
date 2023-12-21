@@ -3,6 +3,7 @@ import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
@@ -28,43 +29,36 @@ public class Calendar extends Application {
     public void start(Stage primaryStage) {
         primaryStage.setTitle("Event Calendar");
 
-        // DatePicker
         datePicker = new DatePicker();
         datePicker.setPromptText("Select a date");
 
-        // Event TextField
         Label eventLabel = new Label("Event:");
         eventTextField = new TextField();
-        eventTextField.setTextFormatter(new TextFormatter<String>(change ->
+        eventTextField.setTextFormatter(new TextFormatter<>(change ->
                 change.getControlNewText().length() <= MAX_CHARACTERS ? change : null));
 
-
-        // Save Button
         Button saveButton = new Button("Save Event");
         saveButton.setOnAction(e -> saveEvent());
 
-        // Delete Button
         Button deleteButton = new Button("Delete Event");
         deleteButton.setOnAction(e -> deleteEvent());
 
-        // Save to File Button
         Button saveToFileButton = new Button("Save to File");
         saveToFileButton.setOnAction(e -> saveToFile());
 
-        // Load from File Button
         Button loadFromFileButton = new Button("Load from File");
         loadFromFileButton.setOnAction(e -> loadFromFile());
 
-        // Event ListView
         eventListView = new ListView<>();
 
-        // FileChooser
         fileChooser = new FileChooser();
 
-        // Layout
+        HBox buttonBox = new HBox(10);
+        buttonBox.getChildren().addAll(saveButton, deleteButton, saveToFileButton, loadFromFileButton);
+
         VBox layout = new VBox(10);
         layout.setPadding(new Insets(10, 10, 10, 10));
-        layout.getChildren().addAll(datePicker, eventLabel, eventTextField, saveButton, deleteButton, saveToFileButton, loadFromFileButton, eventListView);
+        layout.getChildren().addAll(datePicker, eventLabel, eventTextField, buttonBox, eventListView);
 
         Scene scene = new Scene(layout, 400, 400);
         primaryStage.setScene(scene);
