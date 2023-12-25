@@ -50,7 +50,7 @@ public class Calendar extends Application {
         loginButton.setOnAction(e -> {
             String username = usernameField.getText();
 
-            if (!username.isEmpty()) {
+            if (isString(username)) {
                 showCalendar(primaryStage, username);
             } else {
                 showAlert("Login Failed", "Please enter a username");
@@ -65,6 +65,9 @@ public class Calendar extends Application {
 
         primaryStage.show();
 
+    }
+    private boolean isString(String text){
+        return text.matches("[a-zA-Z\\s]+");
     }
     private void showCalendar(Stage primaryStage, String username){
         primaryStage.setTitle("Event Calendar");
