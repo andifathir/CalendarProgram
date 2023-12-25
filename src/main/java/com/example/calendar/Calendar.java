@@ -5,6 +5,8 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.scene.text.Font;
+import javafx.scene.text.FontWeight;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import java.io.*;
@@ -18,6 +20,7 @@ import java.time.format.DateTimeParseException;
 public class Calendar extends Application {
 
    // private static final String VALID_USERNAME = null;
+   private Label name;
     private DatePicker datePicker;
     private TextField eventTextField;
     private ListView<String> eventListView;
@@ -32,13 +35,15 @@ public class Calendar extends Application {
 
     @Override
     public void start(Stage primaryStage) {
-        showLoginScreen(primaryStage);
+        showWelcomeScreen(primaryStage);
     }
-    private void showLoginScreen(Stage primaryStage){
-        primaryStage.setTitle("Login");
+    private void showWelcomeScreen(Stage primaryStage){
+        primaryStage.setTitle("Welcome");
 
-        // Elements for login screen
-        Label usernameLabel = new Label("Username:");
+        Label welcome = new Label("Welcome to Event Calendar");
+        welcome.setFont(Font.font("Helvetica", FontWeight.BOLD, 15f));
+
+        Label usernameLabel = new Label("Enter your name:");
         TextField usernameField = new TextField();
 
         Button loginButton = new Button("Continue");
@@ -46,13 +51,13 @@ public class Calendar extends Application {
             String username = usernameField.getText();
 
             if (!username.isEmpty()) {
-                showCalendar(primaryStage);
+                showCalendar(primaryStage, username);
             } else {
                 showAlert("Login Failed", "Please enter a username");
             }
         });
         VBox loginLayout = new VBox(10);
-        loginLayout.getChildren().addAll(usernameLabel, usernameField, loginButton);
+        loginLayout.getChildren().addAll(welcome, usernameLabel, usernameField, loginButton);
         loginLayout.setPadding(new Insets(10));
 
         Scene loginScene = new Scene(loginLayout, 300, 200);
@@ -61,13 +66,15 @@ public class Calendar extends Application {
         primaryStage.show();
 
     }
-    private void showCalendar(Stage primaryStage){
+    private void showCalendar(Stage primaryStage, String username){
         primaryStage.setTitle("Event Calendar");
+
+        this.name = new Label("Hello, " + username);
+        this.name.setFont(Font.font("Helvetica", FontWeight.MEDIUM , 20f));
 
         datePicker = new DatePicker();
         datePicker.setPromptText("Select a date");
         datePicker.setValue(LocalDate.now());
-
 
         StringConverter<LocalDate> converter = new StringConverter<>() {
             final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
@@ -106,13 +113,16 @@ public class Calendar extends Application {
         deleteButton.setOnAction(e -> deleteEvent());
 
         Button saveToFileButton = new Button("Save to File");
-        saveToFileButton.setOnAction(e -> saveToFile());
+        saveToFileButton.setOnAction(e -> saveToFile(username));
 
         Button updateButton = new Button("Update Event");
         updateButton.setOnAction(e -> updateEvent());
 
         Button loadFromFileButton = new Button("Load from File");
         loadFromFileButton.setOnAction(e -> loadFromFile());
+
+        Button backToHomeButton = new Button("Back to Home");
+        backToHomeButton.setOnAction(actionEvent -> showWelcomeScreen(primaryStage));
 
         eventListView = new ListView<>();
 
@@ -123,7 +133,7 @@ public class Calendar extends Application {
 
         VBox layout = new VBox(10);
         layout.setPadding(new Insets(10, 10, 10, 10));
-        layout.getChildren().addAll(datePicker, eventLabel, eventTextField, buttonBox, eventListView);
+        layout.getChildren().addAll(name, datePicker, eventLabel, eventTextField, buttonBox, eventListView, backToHomeButton);
 
         Scene scene = new Scene(layout, 600, 600);
         primaryStage.setScene(scene);
@@ -191,28 +201,28 @@ public class Calendar extends Application {
         }
     }
 
-    private void saveToFile() {
+    private void saveToFile(String username) {
+        List<String> events = new ArrayList<>(eventListView.getItems());
 
-            List<String> events = new ArrayList<>(eventListView.getItems());
+        if (events.isEmpty()) {
+            showAlert("Warning", "There are no events to save.");
+            return;
+        }
 
-            if (events.isEmpty()) {
-                showAlert("Warning", "There are no events to save.");
-                return;
-            }
+        File file = fileChooser.showSaveDialog(null);
 
-            File file = fileChooser.showSaveDialog(null);
+        if (file != null) {
+            try (PrintWriter writer = new PrintWriter(file)) {
+                writer.println(username);
 
-            if (file != null) {
-                try (PrintWriter writer = new PrintWriter(file)) {
-                    for (String event : events) {
-                        writer.println(event);
-                    }
-                    showAlert("File Saved", "Events have been saved to the file.");
-                } catch (IOException e) {
-                    showAlert("Error", "An error occurred while saving the file.");
+                for (String event : events) {
+                    writer.println(event);
                 }
+                showAlert("File Saved", "Events and username have been saved to the file.");
+            } catch (IOException e) {
+                showAlert("Error", "An error occurred while saving the file.");
             }
-
+        }
     }
 
     private void loadFromFile() {
@@ -220,26 +230,29 @@ public class Calendar extends Application {
 
         if (file != null) {
             try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+                String loadedUsername = reader.readLine();
+
+                name.setText("Hello, " + loadedUsername);
+
                 eventListView.getItems().clear();
                 String line;
-                boolean fileIsEmpty = true; // Menandakan apakah file kosong atau tidak
+                boolean fileIsEmpty = true;
 
                 while ((line = reader.readLine()) != null) {
                     eventListView.getItems().add(line);
-                    fileIsEmpty = false; // Jika ada baris dalam file, maka tidak kosong
+                    fileIsEmpty = false;
                 }
 
                 if (fileIsEmpty) {
-                    showAlert("Warning", "The file is empty."); // Tampilkan peringatan jika file kosong
+                    showAlert("Warning", "The file is empty.");
                 } else {
-                    showAlert("File Loaded", "Events have been loaded from the file.");
+                    showAlert("File Loaded", "Events and username have been loaded from the file.");
                 }
             } catch (IOException e) {
                 showAlert("Error", "An error occurred while loading the file.");
             }
         }
     }
-
 
     private void showAlert(String title, String message) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
