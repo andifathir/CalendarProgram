@@ -17,6 +17,7 @@ import java.time.format.DateTimeParseException;
 
 public class Calendar extends Application {
 
+   // private static final String VALID_USERNAME = null;
     private DatePicker datePicker;
     private TextField eventTextField;
     private ListView<String> eventListView;
@@ -31,6 +32,36 @@ public class Calendar extends Application {
 
     @Override
     public void start(Stage primaryStage) {
+        showLoginScreen(primaryStage);
+    }
+    private void showLoginScreen(Stage primaryStage){
+        primaryStage.setTitle("Login");
+
+        // Elements for login screen
+        Label usernameLabel = new Label("Username:");
+        TextField usernameField = new TextField();
+
+        Button loginButton = new Button("Continue");
+        loginButton.setOnAction(e -> {
+            String username = usernameField.getText();
+
+            if (!username.isEmpty()) {
+                showCalendar(primaryStage);
+            } else {
+                showAlert("Login Failed", "Please enter a username");
+            }
+        });
+        VBox loginLayout = new VBox(10);
+        loginLayout.getChildren().addAll(usernameLabel, usernameField, loginButton);
+        loginLayout.setPadding(new Insets(10));
+
+        Scene loginScene = new Scene(loginLayout, 300, 200);
+        primaryStage.setScene(loginScene);
+
+        primaryStage.show();
+
+    }
+    private void showCalendar(Stage primaryStage){
         primaryStage.setTitle("Event Calendar");
 
         datePicker = new DatePicker();
@@ -104,11 +135,6 @@ public class Calendar extends Application {
         try {
             LocalDate selectedDate = datePicker.getValue();
 
-            if (selectedDate == null) {
-                showAlert("Error", "Please select a date.");
-                return;
-            }
-
             String event = eventTextField.getText();
 
             if (event.isEmpty()) {
@@ -130,7 +156,7 @@ public class Calendar extends Application {
 
 
     private void updateEvent() {
-        try {
+
             int selectedIndex = eventListView.getSelectionModel().getSelectedIndex();
             if (selectedIndex != -1) {
                 String updatedEvent = eventTextField.getText();
@@ -148,9 +174,6 @@ public class Calendar extends Application {
             } else {
                 showAlert("Warning", "Please select an event to update.");
             }
-        } catch (NullPointerException e) {
-            showAlert("Error", "No event selected for update.");
-        }
     }
 
 
@@ -169,8 +192,13 @@ public class Calendar extends Application {
     }
 
     private void saveToFile() {
-        try {
+
             List<String> events = new ArrayList<>(eventListView.getItems());
+
+            if (events.isEmpty()) {
+                showAlert("Warning", "There are no events to save.");
+                return;
+            }
 
             File file = fileChooser.showSaveDialog(null);
 
@@ -184,31 +212,34 @@ public class Calendar extends Application {
                     showAlert("Error", "An error occurred while saving the file.");
                 }
             }
-        } catch (NullPointerException e) {
-            showAlert("Error", "No events to save.");
-        }
+
     }
 
     private void loadFromFile() {
-        try {
-            File file = fileChooser.showOpenDialog(null);
+        File file = fileChooser.showOpenDialog(null);
 
-            if (file != null) {
-                try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
-                    eventListView.getItems().clear();
-                    String line;
-                    while ((line = reader.readLine()) != null) {
-                        eventListView.getItems().add(line);
-                    }
-                    showAlert("File Loaded", "Events have been loaded from the file.");
-                } catch (IOException e) {
-                    showAlert("Error", "An error occurred while loading the file.");
+        if (file != null) {
+            try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+                eventListView.getItems().clear();
+                String line;
+                boolean fileIsEmpty = true; // Menandakan apakah file kosong atau tidak
+
+                while ((line = reader.readLine()) != null) {
+                    eventListView.getItems().add(line);
+                    fileIsEmpty = false; // Jika ada baris dalam file, maka tidak kosong
                 }
+
+                if (fileIsEmpty) {
+                    showAlert("Warning", "The file is empty."); // Tampilkan peringatan jika file kosong
+                } else {
+                    showAlert("File Loaded", "Events have been loaded from the file.");
+                }
+            } catch (IOException e) {
+                showAlert("Error", "An error occurred while loading the file.");
             }
-        } catch (NullPointerException e) {
-            showAlert("Error", "No file selected to load events from.");
         }
     }
+
 
     private void showAlert(String title, String message) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
