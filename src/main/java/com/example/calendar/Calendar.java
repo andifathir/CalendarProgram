@@ -5,6 +5,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.stage.FileChooser;
@@ -19,7 +20,6 @@ import java.time.format.DateTimeParseException;
 
 public class Calendar extends Application {
 
-   // private static final String VALID_USERNAME = null;
    private Label name;
     private DatePicker datePicker;
     private TextField eventTextField;
@@ -42,11 +42,15 @@ public class Calendar extends Application {
 
         Label welcome = new Label("Welcome to Event Calendar");
         welcome.setFont(Font.font("Helvetica", FontWeight.BOLD, 15f));
+        welcome.setTextFill(Color.DARKBLUE);
 
         Label usernameLabel = new Label("Enter your name:");
+        usernameLabel.setFont(Font.font("Helvetica", FontWeight.BOLD,15f));
         TextField usernameField = new TextField();
+        //usernameLabel.setTextFill(Color.DARKGREEN);
 
         Button loginButton = new Button("Continue");
+        loginButton.setStyle("-fx-background-color: #4CAF50; -fx-text-fill: white;");
         loginButton.setOnAction(e -> {
             String username = usernameField.getText();
 
@@ -73,7 +77,8 @@ public class Calendar extends Application {
         primaryStage.setTitle("Event Calendar");
 
         this.name = new Label("Hello, " + username);
-        this.name.setFont(Font.font("Helvetica", FontWeight.MEDIUM , 20f));
+        this.name.setFont(Font.font("Helvetica", FontWeight.BOLD, 20f));
+        this.name.setTextFill(Color.DARKBLUE);
 
         datePicker = new DatePicker();
         datePicker.setPromptText("Select a date");
@@ -105,27 +110,35 @@ public class Calendar extends Application {
         datePicker.setConverter(converter);
 
         Label eventLabel = new Label("Event:");
+        eventLabel.setFont(Font.font("Helvetica",FontWeight.BOLD,15f));
         eventTextField = new TextField();
         eventTextField.setTextFormatter(new TextFormatter<>(change ->
                 change.getControlNewText().length() <= MAX_CHARACTERS ? change : null));
 
         Button saveButton = new Button("Save Event");
         saveButton.setOnAction(e -> saveEvent());
+        saveButton.setStyle("-fx-background-color: #374581; -fx-text-fill: white;");
 
         Button deleteButton = new Button("Delete Event");
         deleteButton.setOnAction(e -> deleteEvent());
+        deleteButton.setStyle("-fx-background-color: #690216; -fx-text-fill: white;");
 
         Button saveToFileButton = new Button("Save to File");
         saveToFileButton.setOnAction(e -> saveToFile(username));
+        saveToFileButton.setStyle("-fx-background-color: #374581; -fx-text-fill: white;");
+
 
         Button updateButton = new Button("Update Event");
         updateButton.setOnAction(e -> updateEvent());
+        updateButton.setStyle("-fx-background-color: #4CAF50; -fx-text-fill: white;");
 
         Button loadFromFileButton = new Button("Load from File");
         loadFromFileButton.setOnAction(e -> loadFromFile());
+        loadFromFileButton.setStyle("-fx-background-color: #374581; -fx-text-fill: white;");
 
         Button backToHomeButton = new Button("Back to Home");
         backToHomeButton.setOnAction(actionEvent -> showWelcomeScreen(primaryStage));
+        backToHomeButton.setStyle("-fx-background-color: #374581; -fx-text-fill: white;");
 
         eventListView = new ListView<>();
 
