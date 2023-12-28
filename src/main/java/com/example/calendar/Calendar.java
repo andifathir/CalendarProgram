@@ -20,13 +20,11 @@ import java.time.format.DateTimeParseException;
 
 public class Calendar extends Application {
 
-   private Label name;
+    private Label name;
     private DatePicker datePicker;
     private TextField eventTextField;
     private ListView<String> eventListView;
-
     private FileChooser fileChooser;
-
     private static final int MAX_CHARACTERS = 100;
 
     public static void main(String[] args) {
@@ -47,17 +45,16 @@ public class Calendar extends Application {
         Label usernameLabel = new Label("Enter your name:");
         usernameLabel.setFont(Font.font("Helvetica", FontWeight.BOLD,15f));
         TextField usernameField = new TextField();
-        //usernameLabel.setTextFill(Color.DARKGREEN);
 
         Button loginButton = new Button("Continue");
         loginButton.setStyle("-fx-background-color: #4CAF50; -fx-text-fill: white;");
         loginButton.setOnAction(e -> {
             String username = usernameField.getText();
 
-            if (isString(username)) {
+            if (username.matches("[a-zA-Z\\s]+")) {
                 showCalendar(primaryStage, username);
             } else {
-                showAlert("Login Failed", "Please enter a username");
+                showAlert("Login Failed", "Please enter a username or use the correct format no numbers :)");
             }
         });
         VBox loginLayout = new VBox(10);
@@ -70,9 +67,7 @@ public class Calendar extends Application {
         primaryStage.show();
 
     }
-    private boolean isString(String text){
-        return text.matches("[a-zA-Z\\s]+");
-    }
+
     private void showCalendar(Stage primaryStage, String username){
         primaryStage.setTitle("Event Calendar");
 
@@ -127,7 +122,6 @@ public class Calendar extends Application {
         saveToFileButton.setOnAction(e -> saveToFile(username));
         saveToFileButton.setStyle("-fx-background-color: #374581; -fx-text-fill: white;");
 
-
         Button updateButton = new Button("Update Event");
         updateButton.setOnAction(e -> updateEvent());
         updateButton.setStyle("-fx-background-color: #4CAF50; -fx-text-fill: white;");
@@ -137,7 +131,7 @@ public class Calendar extends Application {
         loadFromFileButton.setStyle("-fx-background-color: #374581; -fx-text-fill: white;");
 
         Button backToHomeButton = new Button("Back to Home");
-        backToHomeButton.setOnAction(actionEvent -> showWelcomeScreen(primaryStage));
+        backToHomeButton.setOnAction(e -> showWelcomeScreen(primaryStage));
         backToHomeButton.setStyle("-fx-background-color: #374581; -fx-text-fill: white;");
 
         eventListView = new ListView<>();
@@ -180,11 +174,11 @@ public class Calendar extends Application {
         }
     }
 
-
     private void updateEvent() {
-
+        try {
             int selectedIndex = eventListView.getSelectionModel().getSelectedIndex();
             if (selectedIndex != -1) {
+                LocalDate selectedDate = datePicker.getValue();
                 String updatedEvent = eventTextField.getText();
 
                 if (updatedEvent.isEmpty()) {
@@ -192,16 +186,20 @@ public class Calendar extends Application {
                     return;
                 }
 
-                String date = datePicker.getValue().toString();
-                String eventData = date + ": " + updatedEvent;
+                DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+                String formattedDate = selectedDate.format(dateFormatter);
 
+                String eventData = formattedDate + ": " + updatedEvent;
                 eventListView.getItems().set(selectedIndex, eventData);
+
                 showAlert("Event Updated", "Selected event has been updated.");
             } else {
                 showAlert("Warning", "Please select an event to update.");
             }
+        } catch (NullPointerException e) {
+            showAlert("Error", "Please select a date.");
+        }
     }
-
 
     private void deleteEvent() {
         try {
